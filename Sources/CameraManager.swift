@@ -1230,6 +1230,13 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         }
     }
     
+    open func changeExposureDuration(value: Float) {
+        if cameraIsSetup {
+            _changeExposureMode(mode: .custom)
+        }
+        _changeExposureDuration(value: value)
+    }
+    
     // MARK: - CameraManager()
     
     fileprivate func _executeVideoCompletionWithURL(_ url: URL?, error: NSError?) {
