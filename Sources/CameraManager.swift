@@ -1249,6 +1249,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
     fileprivate func _getMovieOutput() -> AVCaptureMovieFileOutput {
         if movieOutput == nil {
             _createMovieOutput()
+        } else {
+            _setupVideoConnection()
         }
         
         return movieOutput!
@@ -1279,6 +1281,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                         // setup video mirroring
                         if videoConnection.isVideoMirroringSupported {
                             videoConnection.isVideoMirrored = (cameraDevice == CameraDevice.front && shouldFlipFrontCameraImage)
+                            if videoConnection.isVideoMirrored {
+                                videoConnection.automaticallyAdjustsVideoMirroring = false
+                            }
                         }
 
                         if videoConnection.isVideoStabilizationSupported {
