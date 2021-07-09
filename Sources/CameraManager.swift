@@ -1237,6 +1237,90 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         _changeExposureDuration(value: value)
     }
     
+    func _changeWhiteBalanceMode(mode: AVCaptureDevice.WhiteBalanceMode) {
+        let device: AVCaptureDevice?
+        
+        switch cameraDevice {
+            case .back:
+                device = backCameraDevice
+            case .front:
+                device = frontCameraDevice
+        }
+        if device?.whiteBalanceMode == mode {
+            return
+        }
+        
+        do {
+            try device?.lockForConfiguration()
+            
+            if device?.isWhiteBalanceModeSupported(mode) == true {
+                device?.whiteBalanceMode = mode
+            }
+            device?.unlockForConfiguration()
+            
+        } catch {
+            return
+        }
+    }
+    
+    func _changeWhiteBalanceGain(r: Float, g: Float, b: Float) {
+        if cameraIsSetup {
+            let device: AVCaptureDevice?
+            
+            switch cameraDevice {
+                case .back:
+                    device = backCameraDevice
+                case .front:
+                    device = frontCameraDevice
+            }
+            
+            guard let videoDevice = device else {
+                return
+            }
+            
+            do {
+                try videoDevice.lockForConfiguration()
+                
+                if videoDevice.whiteBalanceMode == .locked {
+                    var gain = AVCaptureDevice.WhiteBalanceGains.init(redGain: r, greenGain: g, blueGain: b)
+                    gain.redGain = max(gain.redGain, 1.0)
+                    gain.greenGain = max(gain.greenGain, 1.0)
+                    gain.blueGain = max(gain.blueGain, 1.0)
+                    
+                    gain.redGain = min(gain.redGain, device!.maxWhiteBalanceGain)
+                    gain.greenGain = min(gain.greenGain, device!.maxWhiteBalanceGain)
+                    gain.blueGain = min(gain.blueGain, device!.maxWhiteBalanceGain)
+
+                    videoDevice.setWhiteBalanceModeLocked(with: gain, completionHandler: nil)
+                }
+                
+                videoDevice.unlockForConfiguration()
+            } catch {
+                return
+            }
+        }
+    }
+    
+    open var maxWhiteBalanceGain: Float {
+        let device: AVCaptureDevice?
+        
+        switch cameraDevice {
+            case .back:
+                device = backCameraDevice
+            case .front:
+                device = frontCameraDevice
+        }
+        
+        return device?.maxWhiteBalanceGain ?? 1.0
+    }
+    
+    open func changeWhiteBalance(r: Float, g: Float, b: Float) {
+        if cameraIsSetup {
+            _changeWhiteBalanceMode(mode: .locked)
+        }
+        _changeWhiteBalanceGain(r: r, g: g, b: b)
+    }
+    
     // MARK: - CameraManager()
     
     fileprivate func _executeVideoCompletionWithURL(_ url: URL?, error: NSError?) {
