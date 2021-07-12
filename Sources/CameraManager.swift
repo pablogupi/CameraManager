@@ -1251,7 +1251,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         _changeExposureDuration(value: value)
     }
     
-    func _changeWhiteBalanceMode(mode: AVCaptureDevice.WhiteBalanceMode) {
+    // Available modes:
+    // .locked .autoWhiteBalance .continuousAutoWhiteBalance
+    open func _changeWhiteBalanceMode(mode: AVCaptureDevice.WhiteBalanceMode) {
         let device: AVCaptureDevice?
         
         switch cameraDevice {
@@ -1325,7 +1327,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 device = frontCameraDevice
         }
         
-        return device?.maxWhiteBalanceGain ?? 1.0
+        return device?.maxWhiteBalanceGain ?? 4.0
     }
     
     open func changeWhiteBalance(r: Float, g: Float, b: Float) {
